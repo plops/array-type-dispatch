@@ -69,6 +69,8 @@
 			   &environment env)
   (let* ((type (get-array-type a env))
 	 (dims (get-array-rank a env)))
+    (unless type
+      (error "couldn't obtain type of ~a, did you declare it?" a))
     `(let* ((u (make-array (array-dimensions ,a)
 			   :element-type '(unsigned-byte 8)))
 	    (u1 (sb-ext:array-storage-vector u))
@@ -81,6 +83,12 @@
 				       `(,fun (aref a1 i))
 				       `(aref a1 i)))))
        u)))
+
+;; debugging this macro only seems to work with global variables
+(defvar *m* (make-array '(3 3 3) :element-type '(complex single-float)
+		     :initial-element (complex 1s0 2s0)))
+(declaim (type (simple-array (complex single-float) 3) *m*))
+(coerce-into-ub8 *m* phase)
 
 #+nil
 (let ((m (make-array '(3 3 3) :element-type '(complex single-float)
